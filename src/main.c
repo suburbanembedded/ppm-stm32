@@ -33,7 +33,7 @@
 
 /***************** PPM decoding *****************/
 
-#define NUM_CHANNELS 8
+#define NUM_CHANNELS 12
 #define MS_TO_TICKS(x) ((uint16_t)((x) * 4000))
 
 volatile int ch_values[NUM_CHANNELS];
@@ -151,7 +151,8 @@ static void adc_setup(void) {
 
 /***************** USB *****************/
 
-#define HID_EP_LENGTH ((NUM_CHANNELS * 2) + 1 + (ADC_CHANNEL_NUM * 2))
+// #define HID_EP_LENGTH ((NUM_CHANNELS * 2) + 1 + (ADC_CHANNEL_NUM * 2))
+#define HID_EP_LENGTH ((NUM_CHANNELS * 2) + 1)
 
 static usbd_device *usbd_dev;
 
@@ -194,7 +195,7 @@ static const uint8_t hid_report_descriptor[] = {
     0x26, 0xff, 0x0f, // LOGICAL_MAXIMUM
 
     0x75, 16, // REPORT_SIZE 16
-    0x95, 10, // REPORT_COUNT
+    0x95, 12, // REPORT_COUNT
 
     0x09, 0x30, // USAGE (X)
     0x09, 0x31, // USAGE (Y)
@@ -208,6 +209,8 @@ static const uint8_t hid_report_descriptor[] = {
 
     0x09, 0x38, // USAGE (Wheel)
     0x09, 0x40, // USAGE (Vx)
+    0x09, 0x41, // USAGE (41)
+    0x09, 0x42, // USAGE (42)
 
     0x81, 0x02, // INPUT (Data,Var,Abs)
 
@@ -359,10 +362,10 @@ void tim4_isr() {
             buf[(i*2)+2] = val >> 8;
         }
         // adc channels
-        for (int i = 0; i < ADC_CHANNEL_NUM; i++) {
-            buf[(i * 2) + 1 + (NUM_CHANNELS * 2)] = adc_channels[i] & 0xff;
-            buf[(i * 2) + 1 + (NUM_CHANNELS * 2) + 1] = adc_channels[i] >> 8;
-        }
+        // for (int i = 0; i < ADC_CHANNEL_NUM; i++) {
+        //     buf[(i * 2) + 1 + (NUM_CHANNELS * 2)] = adc_channels[i] & 0xff;
+        //     buf[(i * 2) + 1 + (NUM_CHANNELS * 2) + 1] = adc_channels[i] >> 8;
+        // }
 
         usbd_ep_write_packet(usbd_dev, 0x81, (uint8_t *)buf, sizeof(buf));
     }
